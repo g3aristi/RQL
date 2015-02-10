@@ -178,10 +178,27 @@ A function 'replaceAttr' that takes:
 |#
 ;multiple attributes not just one
 (define (select-from lst-att table)
-   ;(sel-helper wanted-att (attributes table) (tuples table) '())
-  ;(getValues (attributes table) wanted-att (tuples table) '())
-  ;(getValuesMultAtt lst-att table '())
   (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
+  )
+
+(define (rename-att name lst-att1 lst-att2 acc)
+  (if (empty? lst-att1)
+      acc
+      (if (contains (first lst-att1) lst-att2 '())
+          (rename-att name (rest lst-att1) lst-att2 
+                      (append acc (list (string-append (string-append name ".")(first lst-att1)))))
+          (rename-att name (rest lst-att1) lst-att2 (append acc (list (first lst-att1))))
+      )
+   ))
+
+(define (rename-atts t1 name1 t2 name2 acc)
+  (append acc (rename-att name2 (attributes t2) (attributes t1)
+          (append acc (rename-att name1 (attributes t1) (attributes t2) '()))))
+  )
+
+(define (cross-product2 t1 t2)
+  (void)
+  (append (attributes t1) (attributes t2))
   )
 
 (define-syntax SELECT

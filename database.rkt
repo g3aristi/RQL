@@ -68,6 +68,21 @@ A function that takes:
    )
   )
 
+(define (getValues al a lst-tuples acc)
+  (if (empty? lst-tuples)
+      acc
+      (getValues al a (rest lst-tuples) (append acc (list (getValue al a (first lst-tuples))) ))
+      )
+  )
+
+(define (getValuesMultAtt lst-att table acc)
+  (if (empty? lst-att)
+      acc
+      (getValuesMultAtt (rest lst-att) table 
+                        (append acc (list (getValues (attributes table) (first lst-att) (tuples table) '()))))
+  ))
+
+
 
 #|
 A function that takes:
@@ -142,13 +157,17 @@ A function 'replaceAttr' that takes:
     [(replace atom table)
      ; Change this!
      (void)]))
-
-(define (sel-helper )
-  )
-
+#|
+(define (sel-helper wanted-att atts tuples acc)
+  (if (empty? tuples)
+      acc
+      (sel-helper wanted-att atts (last tuples)(append acc (getValue atts wanted-att (first tuples))) )
+  ))
+|#
 ;multiple attributes not just one
-(define (select-from att table)
-  (sel-helper att (tuples table) '())
+(define (select-from wanted-att table)
+   ;(sel-helper wanted-att (attributes table) (tuples table) '())
+  (getValues (attributes table) wanted-att (tuples table) '())
   )
 
 (define-syntax SQL
@@ -267,4 +286,4 @@ A function 'replaceAttr' that takes:
 
 
 ;------------------------------------------------------------------------------
-(select-from '("Name" "LikesChocolate") Person)
+(select-from "Name" table1)

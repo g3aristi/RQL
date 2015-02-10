@@ -62,10 +62,13 @@ A function that takes:
   and returns the value of the tuple corresponding to that attribute.
 |#
 (define (getValue al a t)
-  (if (equal? (first al) a)
+  (if (empty? al)
+      (error "Values does not exits, or specefy the table ")
+      (if (equal? (first al) a)
         (first t)
         (getValue (rest al) a (rest t))
    )
+      )
   )
 
 ;same as above but with multiple attributes
@@ -74,14 +77,6 @@ A function that takes:
   (if (empty? lst-att)
       acc
       (getValues2 al (rest lst-att) t (append acc (list (getValue al (first lst-att) t ) )))
-      )
-  )
-
-;Returns table with multiple tuples and with attributes in the list of attributes given
-(define (getValues3 al lst-att tuples acc)
-  (if (empty? tuples)
-      acc
-      (getValues3 al lst-att (rest tuples) (append acc (list(getValues2 al lst-att (first tuples) '()))))
       )
   )
 
@@ -169,17 +164,6 @@ A function 'replaceAttr' that takes:
     [(replace atom table)
      ; Change this!
      (void)]))
-#|
-(define (sel-helper wanted-att atts tuples acc)
-  (if (empty? tuples)
-      acc
-      (sel-helper wanted-att atts (last tuples)(append acc (getValue atts wanted-att (first tuples))) )
-  ))
-|#
-;multiple attributes not just one
-(define (select-from lst-att table)
-  (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
-  )
 
 (define (rename-att name lst-att1 lst-att2 acc)
   (if (empty? lst-att1)
@@ -243,7 +227,7 @@ A function 'replaceAttr' that takes:
   )
 
 (define (cross-atts lst-tables)
-  (renameAll lst-tables (getAllAtts lst-tables '()) '() )
+  (list (renameAll lst-tables (getAllAtts lst-tables '()) '() ))
   )
 
 (define (rename-atts t1 name1 t2 name2 acc)
@@ -257,12 +241,22 @@ A function 'replaceAttr' that takes:
 (define (cartesian-product table1 table2)
   (append* (map(λ (table1-elem) (multiply-elems table1-elem table2))table1)));Run the helper on each element of table1 with table2
 
+(define (n-cartesian-products lst-tables)
+  (n-cart-products-helper (rest(rest lst-tables)) (cartesian-product (rest(first(first lstTables))) (rest(first(first(rest lstTables)))))))
+
+; acc = (cartesian-product (rest(first(first lstTables))) (rest(first(first(rest lstTables)))))
+; lst-tables = (rest(rest lst-tables))
+(define (n-cart-products-helper lst-tables acc)
+  (if (empty? lst-tables)
+      acc
+      (n-cart-products-helper (rest lst-tables) (cartesian-product acc (rest (first (first lst-tables)))))))
+      
+
 (define (crossed-table table1 n1 table2 n2)
   (append 
    (rename-atts table1 n1 table2 n2 '())
    (cartesian-product (rest table1) (rest table2))
-          )
-  )
+          ))
 
 ;table consists of table table-name ex: '((table1 "t1") (table2 "t2"))
 (define (crossed-tables lst-tables acc)
@@ -273,6 +267,25 @@ A function 'replaceAttr' that takes:
                      (first (second lst-tables)) (second (second lst-tables))))
       )
   ))
+
+(define (from lst-tables)
+    (append (cross-atts lst-tables) (append '() (n-cartesian-products lst-tables)))
+  )
+
+;Returns table with multiple tuples and with attributes in the list of attributes given
+(define (getValues3 al lst-att tuples acc)
+  (if (empty? tuples)
+      acc
+      (getValues3 al lst-att (rest tuples) (append acc (list(getValues2 al lst-att (first tuples) '()))))
+      )
+  )
+
+
+
+;multiple attributes not just one
+(define (select-from lst-att table)
+  (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
+  )
 
 (define-syntax SELECT
   (syntax-rules (SELECT * FROM WHERE ORDER-BY)

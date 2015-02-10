@@ -68,20 +68,32 @@ A function that takes:
    )
   )
 
-(define (getValues al a lst-tuples acc)
-  (if (empty? lst-tuples)
+;same as above but with multiple attributes
+;So it returns a Table with only attributes in a list of attributes and a simple tuple
+(define (getValues2 al lst-att t acc)
+  (if (empty? lst-att)
       acc
-      (getValues al a (rest lst-tuples) (append acc (list (getValue al a (first lst-tuples))) ))
+      (getValues2 al (rest lst-att) t (append acc (list (getValue al (first lst-att) t ) )))
       )
   )
 
-(define (getValuesMultAtt lst-att table acc)
-  (if (empty? lst-att)
+;Returns table with multiple tuples and with attributes in the list of attributes given
+(define (getValues3 al lst-att tuples acc)
+  (if (empty? tuples)
       acc
-      (getValuesMultAtt (rest lst-att) table 
-                        (append acc (list (getValues (attributes table) (first lst-att) (tuples table) '()))))
-  ))
+      (getValues3 al lst-att (rest tuples) (append acc (list(getValues2 al lst-att (first tuples) '()))))
+      )
+  )
 
+;Return Tables with attributes in list of attributes given and with all the original tuples
+(define (getValues4 tables lst-att acc)
+  (if (empty? tables)
+      acc
+      (getValues4 (rest tables) lst-att (append acc 
+                                        (list (getValues3 (attributes (first tables)) lst-att
+                                                    (tuples (first tables)) '() ))))
+      )
+  )
 
 
 #|
@@ -165,13 +177,17 @@ A function 'replaceAttr' that takes:
   ))
 |#
 ;multiple attributes not just one
-(define (select-from wanted-att table)
+(define (select-from lst-att table)
    ;(sel-helper wanted-att (attributes table) (tuples table) '())
-  (getValues (attributes table) wanted-att (tuples table) '())
+  ;(getValues (attributes table) wanted-att (tuples table) '())
+  ;(getValuesMultAtt lst-att table '())
+  (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
   )
 
-(define-syntax SQL
-  (syntax-rules (SELECT FROM)
+(define-syntax SELECT
+  (syntax-rules (SELECT * FROM WHERE ORDER-BY)
+    [(SELECT <attrs> FROM <table>)
+     (select-from <attrs> <table>)]
   ))
 
 ;---------------------------Our Own Testing-------------------------------------------------
@@ -286,4 +302,4 @@ A function 'replaceAttr' that takes:
 
 
 ;------------------------------------------------------------------------------
-(select-from "Name" table1)
+;(select-from '("Name" "City") table1)

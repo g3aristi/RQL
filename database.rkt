@@ -186,6 +186,7 @@ A function 'replaceAttr' that takes:
 
 (define-syntax SELECT
   (syntax-rules (SELECT * FROM WHERE ORDER-BY)
+    [(SELECT * FROM table) table]
     [(SELECT <attrs> FROM <table>)
      (select-from <attrs> <table>)]
   ))

@@ -280,20 +280,32 @@ A function 'replaceAttr' that takes:
       )
   )
 
-
-
 ;multiple attributes not just one
 (define (select-from lst-att table)
   (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
   )
 
+(define (select-from-where lst-att table pred)
+  (select-from lst-att (satisfyCond pred table))
+  )
+
+;(SELECT '("t1.Name" "t3.Name") FROM (from lstTables))
 (define-syntax SELECT
   (syntax-rules (SELECT * FROM WHERE ORDER-BY)
     [(SELECT * FROM table) table]
     [(SELECT <attrs> FROM <table>)
      (select-from <attrs> <table>)]
+    [(SELECT <attrs> FROM <lst-table> WHERE <pred>)
+     (select-from-where <attrs> <lst-table> <pred>)]
+    ;[(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ...))
+     ;select-from <attrs> ]
   ))
 
+
+(define (order-by atts table)
+  (sort (tuples table) > )
+  
+  )
 ;---------------------------Our Own Testing-------------------------------------------------
 
 
@@ -412,3 +424,10 @@ A function 'replaceAttr' that takes:
 
 ;------------------------------------------------------------------------------
 ;(select-from '("Name" "City") table1)
+
+(define (f8)
+    (if (> "Age" 25)
+        #t
+        #f
+    )
+)

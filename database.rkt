@@ -191,6 +191,61 @@ A function 'replaceAttr' that takes:
       )
    ))
 
+;return a list of all attributes in all the listed tables
+(define (getAllAtts lst-tables acc)
+  (if (empty? lst-tables)
+      acc
+      (getAllAtts (rest lst-tables)(append acc (attributes (first (first lst-tables)))))
+      )
+  )
+
+;counts duplicates
+(define (count-dup target lst)
+  (count (λ (curr-a) (equal? curr-a target)) lst)
+  )
+
+(define (rename? att lst-atts)
+  (if (> (count-dup att lst-atts) 1)
+      #t
+      #f
+  ))
+
+(define (rename2 pre att-name)
+  (string-append (string-append pre ".") att-name)
+  )
+
+(define (rename-atts-table prefix table-atts lst-atts acc)
+  (if (empty? table-atts)
+      acc
+      (if (rename? (first table-atts) lst-atts) 
+          ;then rename
+          (rename-atts-table prefix (rest table-atts) lst-atts 
+                             (append acc (list (rename2 prefix (first table-atts)))))
+          ;just add it to acc
+          (rename-atts-table prefix (rest table-atts) lst-atts
+                              (append acc (list (first table-atts))))
+          )
+      )
+  )
+
+(define (renameAll lst-tables all-atts acc)
+  (if (empty? lst-tables)
+      acc
+      (renameAll (rest lst-tables) all-atts (append acc 
+                                              (rename-atts-table 
+                                              (second (first lst-tables)) 
+                                              (attributes (first (first lst-tables)))
+                                               all-atts
+                                               '())
+                                               ))
+      )
+  
+  )
+
+(define (cross-atts lst-tables)
+  (renameAll lst-tables (getAllAtts lst-tables '()) '() )
+  )
+
 (define (rename-atts t1 name1 t2 name2 acc)
   (list (append acc (rename-att name2 (attributes t2) (attributes t1)
           (append acc (rename-att name1 (attributes t1) (attributes t2) '()))))
@@ -207,8 +262,17 @@ A function 'replaceAttr' that takes:
    (rename-atts table1 n1 table2 n2 '())
    (cartesian-product (rest table1) (rest table2))
           )
-  
   )
+
+;table consists of table table-name ex: '((table1 "t1") (table2 "t2"))
+(define (crossed-tables lst-tables acc)
+  (if (empty? lst-tables)
+      acc
+      (crossed-tables (rest (rest lst-tables))
+                      (append acc (crossed-table (first (first lst-tables)) (second (first lst-tables)) 
+                     (first (second lst-tables)) (second (second lst-tables))))
+      )
+  ))
 
 (define-syntax SELECT
   (syntax-rules (SELECT * FROM WHERE ORDER-BY)
@@ -242,6 +306,11 @@ A function 'replaceAttr' that takes:
     ("David" "CSC343")
     ))
 
+(define lstTables 
+  (list (list table1 "t1")
+        (list Person "t2")
+        (list Teaching "t3"))
+  )
 ;------------------------ Testing Attributes----------------------
 (write "Testing attributes -----------")
 (write "Table1")

@@ -192,13 +192,22 @@ A function 'replaceAttr' that takes:
    ))
 
 (define (rename-atts t1 name1 t2 name2 acc)
-  (append acc (rename-att name2 (attributes t2) (attributes t1)
+  (list (append acc (rename-att name2 (attributes t2) (attributes t1)
           (append acc (rename-att name1 (attributes t1) (attributes t2) '()))))
-  )
+  ))
 
-(define (cross-product2 t1 t2)
-  (void)
-  (append (attributes t1) (attributes t2))
+(define (multiply-elems Table1-elem Table2) ;helper function to multiply individual elements from table1 with all the elements in table2
+  (map (λ (Table2-elem) (append Table1-elem Table2-elem)) Table2)) ;for each element in table2 append that element to table1
+
+(define (cartesian-product table1 table2)
+  (append* (map(λ (table1-elem) (multiply-elems table1-elem table2))table1)));Run the helper on each element of table1 with table2
+
+(define (crossed-table table1 n1 table2 n2)
+  (append 
+   (rename-atts table1 n1 table2 n2 '())
+   (cartesian-product (rest table1) (rest table2))
+          )
+  
   )
 
 (define-syntax SELECT

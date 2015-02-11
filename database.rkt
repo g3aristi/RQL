@@ -288,6 +288,13 @@ A function 'replaceAttr' that takes:
   (getValues3 (attributes table) lst-att (tuples table) (list lst-att))
   )
 
+(define (apply-pred ope target-att target-val table)
+  (append (list (attributes table))
+          (filter (λ (t) (ope (list-ref t 
+                                (attIndex target-att (attributes table) 0) )
+                      target-val)) (tuples table)))
+  )
+
 (define (select-from-where lst-att table pred)
   (select-from lst-att (satisfyCond pred table))
   )
@@ -298,6 +305,14 @@ A function 'replaceAttr' that takes:
     [(SELECT * FROM table) table]
     [(SELECT <attrs> FROM <table>)
      (select-from <attrs> <table>)]
+    [(SELECT * FROM [<table1> <name1>] [<table2> <name2>] ...)
+     (from (list (list <table1> <name1>)
+                 (list <table2> <name2>)... ))]
+    [(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ...)
+     (select-from <attrs> (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... )))]
     [(SELECT <attrs> FROM <lst-table> WHERE <pred>)
      (select-from-where <attrs> <lst-table> <pred>)]
     ;[(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ...))
@@ -322,7 +337,7 @@ A function 'replaceAttr' that takes:
   ))
 ;---------------------------Our Own Testing-------------------------------------------------
 
-#|
+
 ;---------------------Prepared tables---------------------------
 (define table1
   '(("Name" "Age" "City")
@@ -444,4 +459,4 @@ A function 'replaceAttr' that takes:
         #t
         #f
     )
-) |#
+) 

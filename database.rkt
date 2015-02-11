@@ -2,7 +2,7 @@
 
 ***Write the names and CDF accounts for each of your group members below.***
 Gilberto Aristizabal, g3aristi
-<Name>, <CDF>
+Tyler Pham, g3phamty
 |#
 #lang racket
 

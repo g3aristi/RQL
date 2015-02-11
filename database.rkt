@@ -311,7 +311,7 @@ A function 'replaceAttr' that takes:
      )
   )
 
-(define (order-by att table by)
+(define (order-by att table [by >])
   (let ([i (find-att-loc att (attributes table) 0)])
     (sort (tuples table)
           #:key (λ (x)(list-ref x i)) by)

@@ -261,7 +261,7 @@ the test we created
       '(("LikesChocolate" "Name")
         (#t "David")
         (#t "Jen")))
-
+|#
 ; Condition as function of one attribute, select all
 (test (SELECT *
         FROM Person
@@ -276,7 +276,7 @@ the test we created
       '(()
         ()
         ()))
-
+#|
 ; Constant true condition
 (test (SELECT *
         FROM Person

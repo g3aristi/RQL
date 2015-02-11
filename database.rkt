@@ -147,25 +147,15 @@ A function 'replaceAttr' that takes:
 )
 
 (define (attIndex target la ind)
-    (if (equal? target (first la))
+  (if (empty? la)
+      ind
+      (if (equal? target (first la))
         ind
         (attIndex target (rest la) (+ 1 ind))
-    )    
+    ))
 )
 
 ; Starter for Part 4; feel free to ignore!
-
-; What should this macro do?
-(define-syntax replace
-  (syntax-rules ()
-    ; The recursive step, when given a compound expression
-    [(replace (expr ...) table)
-     ; Change this!
-     (void)]
-    ; The base case, when given just an atom. This is easier!
-    [(replace atom table)
-     ; Change this!
-     (void)]))
 
 (define (rename-att name lst-att1 lst-att2 acc)
   (if (empty? lst-att1)
@@ -295,13 +285,23 @@ A function 'replaceAttr' that takes:
                       target-val)) (tuples table)))
   )
 
-(define (select-from-where lst-att table pred)
-  (select-from lst-att (satisfyCond pred table))
+(define (select-from-where lst-att table ope target-att target-val)
+  (select-from lst-att (apply-pred ope target-att target-val table))
   )
+
+; What should this macro do?
+(define-syntax replace
+  (syntax-rules ()
+    ; The recursive step, when given a compound expression
+    [(replace (expr ...) table)
+     (filter (λ (t) (append (list (list-ref t (attIndex expr (attributes table) 0))))...)(tuples table))]
+    ; The base case, when given just an atom. This is easier!
+    [(replace atom table)
+     (filter (λ (t) (list-ref t (attIndex atom (attributes table) 0)))(tuples table))]))
 
 ;(SELECT '("t1.Name" "t3.Name") FROM (from lstTables))
 (define-syntax SELECT
-  (syntax-rules (SELECT * FROM WHERE ORDER-BY)
+  (syntax-rules (SELECT * FROM WHERE ORDER BY)
     [(SELECT * FROM table) table]
     [(SELECT <attrs> FROM <table>)
      (select-from <attrs> <table>)]
@@ -313,10 +313,12 @@ A function 'replaceAttr' that takes:
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
                                       ... )))]
-    [(SELECT <attrs> FROM <lst-table> WHERE <pred>)
-     (select-from-where <attrs> <lst-table> <pred>)]
-    ;[(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ...))
-     ;select-from <attrs> ]
+    [(SELECT * FROM <table> WHERE (<ope> <ta> <tv>))
+     (apply-pred <ope> <ta> <tv> <table>)]
+    [(SELECT <attrs> FROM <lst-table> WHERE <pred>) 
+     (replace <pred>)]
+    ;[(SELECT <attrs> FROM <lst-table> WHERE <pred> ORDER BY <ord>)
+     ;(select-from-where <attrs> <lst-table> <pred>)]
   ))
 
 (define(find-att-loc att table-atts i)

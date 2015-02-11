@@ -84,8 +84,7 @@ and your TAs will appreciate it!
       '(("Name" "Age" "LikesChocolate") 
         ("David" 20 #t) 
         ("Jen" 30 #t) 
-        ("Paul" 100 #f)))
-
+        ("Paul" 100 #f))) 
 ; Reordering columns
 (test (SELECT '("Age" "LikesChocolate" "Name") FROM Person)
       '(("Age" "LikesChocolate" "Name")
@@ -111,7 +110,7 @@ and your TAs will appreciate it!
    ("Hi" 5)
    ("Bye" 5)
    ("Hi" 10)))
-
+#|
 ; Select all from two product of two tables
 (test (SELECT * FROM [Person "P"] [Teaching "T"])
       '(("P.Name" "Age" "LikesChocolate" "T.Name" "Course")
@@ -404,3 +403,4 @@ and your TAs will appreciate it!
    (1 "Dog" "Cat")
    (10 "Hi" "Bye")
    (10 "Dog" "Cat")))
+|#

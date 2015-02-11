@@ -16,7 +16,8 @@ Tyler Pham, g3phamty
 ; to the provide statement.
 (provide attributes
          tuples
-         size)
+         size
+         SELECT)
 
 ; Part 0: Semantic aliases
 
@@ -242,7 +243,8 @@ A function 'replaceAttr' that takes:
   (append* (map(λ (table1-elem) (multiply-elems table1-elem table2))table1)));Run the helper on each element of table1 with table2
 
 (define (n-cartesian-products lst-tables)
-  (n-cart-products-helper (rest(rest lst-tables)) (cartesian-product (rest(first(first lstTables))) (rest(first(first(rest lstTables)))))))
+  (n-cart-products-helper (rest(rest lst-tables)) 
+                          (cartesian-product (rest(first(first lst-tables))) (rest(first(first(rest lst-tables)))))))
 
 ; acc = (cartesian-product (rest(first(first lstTables))) (rest(first(first(rest lstTables)))))
 ; lst-tables = (rest(rest lst-tables))
@@ -319,7 +321,7 @@ A function 'replaceAttr' that takes:
   ))
 ;---------------------------Our Own Testing-------------------------------------------------
 
-
+#|
 ;---------------------Prepared tables---------------------------
 (define table1
   '(("Name" "Age" "City")
@@ -442,3 +444,4 @@ A function 'replaceAttr' that takes:
         #f
     )
 )
+|#

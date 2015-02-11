@@ -46,12 +46,15 @@ Gilberto Aristizabal, g3aristi
 
 ;empty attributes => no attributes
 ;could be defined as '(())
-(define ZeroAtt
+(define ZeroAttV1
   '(()
     ("David" "CSC324")
     ("Paul" "CSC108")
     ("David" "CSC343")
     ))
+
+(define ZeroAttV2
+  '(()))
 
 
 ;tables with duplicates tuples
@@ -92,10 +95,21 @@ the test we created
 
 ;----- This is where our tests begings ----
 ; ---- SELECT/FROM tests ----
-; Select all from an empty table
+
+;**** Testing from with single tables
+; Select all from an empty single table
 (test (SELECT * FROM Empty)
       '(("Name" "Course")))
-;select multiple attributes from a empty table
+; Select all from zero attribute table version one single table
+(test (SELECT * FROM ZeroAttV1)
+      '(()
+        ("David" "CSC324")
+        ("Paul" "CSC108")
+        ("David" "CSC343")))
+; Select all from zero attribute table version 2 single table
+(test (SELECT * FROM ZeroAttV2)
+      '(()))
+;select multiple attributes from a empty single table
 (test (SELECT '("Name" "LikesChocolate") FROM Empty)
       '(("Name" "LikesChocolate")))
 ;select multiple attributes from a single table
@@ -104,71 +118,35 @@ the test we created
         ("David" #t)
         ("Jen" #t)
         ("Paul" #f)))
-;------ TESTING BEFORE DOING THE MACRO SYNTAX ----
-(define per-teac-lst
-  (list (list Person "P") (list Teaching "T")))
-;wrong format before macros
-(test (SELECT * FROM (from per-teac-lst))
-      '(("P.Name" "Age" "LikesChocolate" "T.Name" "Course")
-        ("David" 20 #t "David" "CSC324")
-        ("David" 20 #t "Paul" "CSC108")
-        ("David" 20 #t "David" "CSC343")
-        ("Jen" 30 #t "David" "CSC324")
-        ("Jen" 30 #t "Paul" "CSC108")
-        ("Jen" 30 #T "David" "CSC343")
-        ("Paul" 100 #f "David" "CSC324")
-        ("Paul" 100 #f "Paul" "CSC108")
-        ("Paul" 100 #f "David" "CSC343")))
 
-; Select some from two tables
-(test (SELECT '("P.Name" "Course" "Age") FROM (from per-teac-lst))
-      '(("P.Name" "Course" "Age")
-        ("David" "CSC324" 20)
-        ("David" "CSC108" 20)
-        ("David" "CSC343" 20)
-        ("Jen" "CSC324" 30)
-        ("Jen" "CSC108" 30)
-        ("Jen" "CSC343" 30)
-        ("Paul" "CSC324" 100)
-        ("Paul" "CSC108" 100)
-        ("Paul" "CSC343" 100)))
+;**** Testing from with multiple tables
+;Select all from two tables, one empty table and with data
+(test (SELECT * FROM [Empty "e"] [Person "p"])
+      '(("e.Name" "Course" "p.Name" "Age" "LikesChocolate")))
+;Select some attributes from two tables, one empty table and with data
+(test (SELECT '("e.Name" "Course" "LikesChocolate") 
+              FROM [Person "p"] [Empty "e"])
+      '(("e.Name" "Course" "LikesChocolate")))
+;Select duplicate attributes from two tables
+(test (SELECT '("P.Name" "D.Name" "Course") 
+              FROM [Person "P"] [DupTuples "D"])
+      '(("P.Name" "D.Name" "Course")
+        ("David" "David" "CSC324")
+        ("David" "David" "CSC324")
+        ("David" "David" "CSC324")
+        ("David" "Paul" "CSC108")
+        ("David" "David" "CSC343")
+        ("Jen" "David" "CSC324")
+        ("Jen" "David" "CSC324")
+        ("Jen" "David" "CSC324")
+        ("Jen" "Paul" "CSC108")
+        ("Jen" "David" "CSC343")
+        ("Paul" "David" "CSC324")
+        ("Paul" "David" "CSC324")
+        ("Paul" "David" "CSC324")
+        ("Paul" "Paul" "CSC108")
+        ("Paul" "David" "CSC343")))
 
-;Testing before right syntax
-(define 2teach
-  (list (list Teaching "E1") (list Teaching "E")))
-; Take the product of a table with itself
-(test (SELECT '("E.Course" "E1.Course") FROM (from 2teach))
-      '(("E.Course" "E1.Course")
-        ("CSC324" "CSC324")
-        ("CSC108" "CSC324")
-        ("CSC343" "CSC324")
-        ("CSC324" "CSC108")
-        ("CSC108" "CSC108")
-        ("CSC343" "CSC108")
-        ("CSC324" "CSC343")
-        ("CSC108" "CSC343")
-        ("CSC343" "CSC343")))
-
-(define lit-test (list (list'(("Age" "A" "Name" "D")
-           (1 "Hi" 5 #t)
-           (2 "Bye" 5 #f)
-           (3 "Hi" 10 #t))
-         "T1")
-        (list Person "T2")))
-; Take the product of a literal table with an identifier
-(test
- (SELECT *
-   FROM (from lit-test))
- '(("T1.Age" "A" "T1.Name" "D" "T2.Name" "T2.Age" "LikesChocolate")
-   (1 "Hi" 5 #t "David" 20 #t)
-   (1 "Hi" 5 #t "Jen" 30 #t)
-   (1 "Hi" 5 #t "Paul" 100 #f)
-   (2 "Bye" 5 #f "David" 20 #t)
-   (2 "Bye" 5 #f "Jen" 30 #t)
-   (2 "Bye" 5 #f "Paul" 100 #f)
-   (3 "Hi" 10 #t "David" 20 #t)
-   (3 "Hi" 10 #t "Jen" 30 #t)
-   (3 "Hi" 10 #t "Paul" 100 #f)))
 
 
 ;---- This is where our test ends -----
@@ -207,7 +185,7 @@ the test we created
    ("Hi" 5)
    ("Bye" 5)
    ("Hi" 10)))
-#|
+
 ; Select all from two product of two tables
 (test (SELECT * FROM [Person "P"] [Teaching "T"])
       '(("P.Name" "Age" "LikesChocolate" "T.Name" "Course")
@@ -220,7 +198,6 @@ the test we created
         ("Paul" 100 #f "David" "CSC324")
         ("Paul" 100 #f "Paul" "CSC108")
         ("Paul" 100 #f "David" "CSC343")))
-
 ; Select some from two tables
 (test (SELECT '("P.Name" "Course" "Age") FROM [Person "P"] [Teaching "T"])
       '(("P.Name" "Course" "Age")
@@ -267,7 +244,7 @@ the test we created
    (3 "Hi" 10 #t "Jen" 30 #t)
    (3 "Hi" 10 #t "Paul" 100 #f)))
 
-
+#|
 ; ---- WHERE ----
 ; Attribute as condition, select all
 (test (SELECT *

@@ -1,8 +1,8 @@
 #| Assignment 1 - Racket Query Language Tests (due February 11, noon)
 
 ***Write the names and CDF accounts for each of your group members below.***
-<Name>, <CDF>
-<Name>, <CDF>
+Tyler Pham, g3phamty
+Gilberto Aristizabal, g3aristi
 |#
 
 ; Note the use of plai here; this is required for "test"
@@ -33,6 +33,36 @@
     ("David" "CSC343")
     ))
 
+;empty table
+(define Empty
+  '(("Name" "Course")))
+
+;table with 1 att
+(define OneAtt
+  '(("Name")
+    ("David")
+    ("Paul")
+    ("David")))
+
+;empty attributes => no attributes
+;could be defined as '(())
+(define ZeroAtt
+  '(()
+    ("David" "CSC324")
+    ("Paul" "CSC108")
+    ("David" "CSC343")
+    ))
+
+
+;tables with duplicates tuples
+(define DupTuples
+  '(("Name" "Course")
+    ("David" "CSC324")
+    ("David" "CSC324")
+    ("David" "CSC324")
+    ("Paul" "CSC108")
+    ("David" "CSC343")
+    ))
 
 #|
 All tests go below. 

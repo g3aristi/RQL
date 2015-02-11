@@ -301,11 +301,22 @@ A function 'replaceAttr' that takes:
      ;select-from <attrs> ]
   ))
 
-
-(define (order-by atts table)
-  (sort (tuples table) > )
-  
+(define(find-att-loc att table-atts i)
+  (if(empty? table-atts)
+     i
+     (if (equal? (first table-atts) att)
+         i
+         (find-att-loc att (rest table-atts) (+ i 1))
+         )
+     )
   )
+
+(define (order-by att table by)
+  (let ([i (find-att-loc att (attributes table) 0)])
+    (sort (tuples table)
+          #:key (λ (x)(list-ref x i)) by)
+  
+  ))
 ;---------------------------Our Own Testing-------------------------------------------------
 
 

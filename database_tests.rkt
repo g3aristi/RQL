@@ -244,7 +244,7 @@ the test we created
    (3 "Hi" 10 #t "Jen" 30 #t)
    (3 "Hi" 10 #t "Paul" 100 #f)))
 
-#|
+
 ; ---- WHERE ----
 ; Attribute as condition, select all
 (test (SELECT *
@@ -261,7 +261,7 @@ the test we created
       '(("LikesChocolate" "Name")
         (#t "David")
         (#t "Jen")))
-|#
+
 ; Condition as function of one attribute, select all
 (test (SELECT *
         FROM Person
@@ -276,7 +276,7 @@ the test we created
       '(()
         ()
         ()))
-#|
+
 ; Constant true condition
 (test (SELECT *
         FROM Person
@@ -322,7 +322,6 @@ the test we created
         ("Paul" #f 30 "CSC108")
         ("David" #t 30 "CSC343")))
 
-
 ; ---- ORDER BY ----
 ; Order by attribute
 (test (SELECT *
@@ -341,7 +340,7 @@ the test we created
         ("Paul")
         ("Jen")
         ("David")))
-
+#|
 ; Order by a function of an attribute
 (test (SELECT *
         FROM Person
@@ -359,7 +358,7 @@ the test we created
         ("David" "CSC324")
         ("David" "CSC343")
         ("Paul" "CSC108")))
-
+|#
 ; Order on a literal table
 (test (SELECT *
         FROM '(("A" "B" "C") 
@@ -388,7 +387,7 @@ the test we created
         ("David" 20 #t "David" "CSC324")
         ("David" 20 #t "Paul" "CSC108")
         ("David" 20 #t "David" "CSC343")))
-
+#|
 
 ; ---- ORDER BY and WHERE ----
 ; Use attributes, select all 

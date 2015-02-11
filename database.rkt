@@ -293,11 +293,11 @@ A function 'replaceAttr' that takes:
 (define-syntax replace
   (syntax-rules ()
     ; The recursive step, when given a compound expression
-    [(replace (expr ...) table)
-     (filter (λ (t) (append (list (list-ref t (attIndex expr (attributes table) 0))))...)(tuples table))]
+    [(replace (expr expr1 ...) table)
+     (filter (λ (t) (expr ((replaceAttr expr1 (attributes table)) t)...)) (tuples table))]
     ; The base case, when given just an atom. This is easier!
     [(replace atom table)
-     (filter (λ (t) (list-ref t (attIndex atom (attributes table) 0)))(tuples table))]))
+     (filter (λ (t) (list-ref t (attIndex atom (attributes table) 0))) (tuples table))]))
 
 ;(SELECT '("t1.Name" "t3.Name") FROM (from lstTables))
 (define-syntax SELECT
@@ -313,26 +313,46 @@ A function 'replaceAttr' that takes:
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
                                       ... )))]
-    [(SELECT * FROM <table> WHERE (<ope> <ta> <tv>))
-     (apply-pred <ope> <ta> <tv> <table>)]
-    [(SELECT <attrs> FROM <lst-table> WHERE <pred>) 
-     (replace <pred>)]
+    [(SELECT * FROM <table> WHERE <pred>)
+     (append (list (attributes <table>)) (replace <pred> <table>))]
+    [(SELECT <attrs> FROM <table> WHERE <pred>) 
+     (select-from <attrs> (append (list (attributes <table>)) (replace <pred> <table>)))]    
+    [(SELECT * FROM [<table1> <name1>] [<table2> <name2>] ... WHERE <pred>)
+    (append (list (attributes (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... ))
+                              )) (replace <pred> (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... ))))]
+    [(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ... WHERE <pred>)
+    (select-from <attrs> (append (list (attributes (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... ))
+                              )) (replace <pred> (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... )))))]
+    [(SELECT * FROM <table> ORDER BY <ord>)
+     (append (list (attributes <table>))(order-by <ord> <table>))]
+    [(SELECT <attrs> FROM <table> ORDER BY <ord>)
+     (select-from <attrs> (append (list <attrs>)(order-by <ord> <table>)))]
+    [(SELECT * FROM [<table1> <name1>] [<table2> <name2>] ... ORDER BY <ord>)
+     (append (list (attributes (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
+                                      ... ))))
+             (order-by <ord> (from (list (list <table1> <name1>)
+                                                                    (list <table2> <name2>)
+                                                                    ... ))))]
     ;[(SELECT <attrs> FROM <lst-table> WHERE <pred> ORDER BY <ord>)
      ;(select-from-where <attrs> <lst-table> <pred>)]
   ))
 
-(define(find-att-loc att table-atts i)
-  (if(empty? table-atts)
-     i
-     (if (equal? (first table-atts) att)
-         i
-         (find-att-loc att (rest table-atts) (+ i 1))
-         )
-     )
-  )
-
 (define (order-by att table [by >])
-  (let ([i (find-att-loc att (attributes table) 0)])
+  (let ([i (attIndex att (attributes table) 0)])
     (sort (tuples table)
           #:key (λ (x)(list-ref x i)) by)
   

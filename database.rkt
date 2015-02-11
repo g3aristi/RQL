@@ -17,6 +17,7 @@ Tyler Pham, g3phamty
 (provide attributes
          tuples
          size
+         from
          SELECT)
 
 ; Part 0: Semantic aliases
@@ -443,5 +444,4 @@ A function 'replaceAttr' that takes:
         #t
         #f
     )
-)
-|#
+) |#

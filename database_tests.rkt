@@ -68,6 +68,14 @@ Gilberto Aristizabal, g3aristi
 All tests go below. 
 We have divided our tests into five sections:
 - No WHERE/ORDER BY
+    * empty table
+    * table with just 1 attribute
+    * 0 attributes 
+    * duplicates
+    * select all
+    * reordering collums
+    * duplicate tables
+    * literal tables
 - WHERE clause, but no ORDER BY
 - ORDER BY clause, but no WHERE
 - Both WHERE and ORDER BY
@@ -75,8 +83,97 @@ We have divided our tests into five sections:
 
 Please respect this categorization when you add your tests,
 and your TAs will appreciate it!
+
+************************************************
+Our tests also follow the structure above, but we
+decided to separeta them so the TAs can easily see
+the test we created
 |#
 
+;----- This is where our tests begings ----
+; ---- SELECT/FROM tests ----
+; Select all from an empty table
+(test (SELECT * FROM Empty)
+      '(("Name" "Course")))
+;select multiple attributes from a empty table
+(test (SELECT '("Name" "LikesChocolate") FROM Empty)
+      '(("Name" "LikesChocolate")))
+;select multiple attributes from a single table
+(test (SELECT '("Name" "LikesChocolate") FROM Person)
+      '(("Name" "LikesChocolate")
+        ("David" #t)
+        ("Jen" #t)
+        ("Paul" #f)))
+;------ TESTING BEFORE DOING THE MACRO SYNTAX ----
+(define per-teac-lst
+  (list (list Person "P") (list Teaching "T")))
+;wrong format before macros
+(test (SELECT * FROM (from per-teac-lst))
+      '(("P.Name" "Age" "LikesChocolate" "T.Name" "Course")
+        ("David" 20 #t "David" "CSC324")
+        ("David" 20 #t "Paul" "CSC108")
+        ("David" 20 #t "David" "CSC343")
+        ("Jen" 30 #t "David" "CSC324")
+        ("Jen" 30 #t "Paul" "CSC108")
+        ("Jen" 30 #T "David" "CSC343")
+        ("Paul" 100 #f "David" "CSC324")
+        ("Paul" 100 #f "Paul" "CSC108")
+        ("Paul" 100 #f "David" "CSC343")))
+
+; Select some from two tables
+(test (SELECT '("P.Name" "Course" "Age") FROM (from per-teac-lst))
+      '(("P.Name" "Course" "Age")
+        ("David" "CSC324" 20)
+        ("David" "CSC108" 20)
+        ("David" "CSC343" 20)
+        ("Jen" "CSC324" 30)
+        ("Jen" "CSC108" 30)
+        ("Jen" "CSC343" 30)
+        ("Paul" "CSC324" 100)
+        ("Paul" "CSC108" 100)
+        ("Paul" "CSC343" 100)))
+
+;Testing before right syntax
+(define 2teach
+  (list (list Teaching "E1") (list Teaching "E")))
+; Take the product of a table with itself
+(test (SELECT '("E.Course" "E1.Course") FROM (from 2teach))
+      '(("E.Course" "E1.Course")
+        ("CSC324" "CSC324")
+        ("CSC108" "CSC324")
+        ("CSC343" "CSC324")
+        ("CSC324" "CSC108")
+        ("CSC108" "CSC108")
+        ("CSC343" "CSC108")
+        ("CSC324" "CSC343")
+        ("CSC108" "CSC343")
+        ("CSC343" "CSC343")))
+
+(define lit-test (list (list'(("Age" "A" "Name" "D")
+           (1 "Hi" 5 #t)
+           (2 "Bye" 5 #f)
+           (3 "Hi" 10 #t))
+         "T1")
+        (list Person "T2")))
+; Take the product of a literal table with an identifier
+(test
+ (SELECT *
+   FROM (from lit-test))
+ '(("T1.Age" "A" "T1.Name" "D" "T2.Name" "T2.Age" "LikesChocolate")
+   (1 "Hi" 5 #t "David" 20 #t)
+   (1 "Hi" 5 #t "Jen" 30 #t)
+   (1 "Hi" 5 #t "Paul" 100 #f)
+   (2 "Bye" 5 #f "David" 20 #t)
+   (2 "Bye" 5 #f "Jen" 30 #t)
+   (2 "Bye" 5 #f "Paul" 100 #f)
+   (3 "Hi" 10 #t "David" 20 #t)
+   (3 "Hi" 10 #t "Jen" 30 #t)
+   (3 "Hi" 10 #t "Paul" 100 #f)))
+
+
+;---- This is where our test ends -----
+
+;****** STARTER CODE ********
 
 ; ---- SELECT/FROM tests ----
 ; Select all

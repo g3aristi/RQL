@@ -149,16 +149,12 @@ the test we created
 
 ;***** Testing SELECT FROM WHERE *****
 ;select single attribute using a specific where
-(test (SELECT '("Name") FROM Person WHERE (= "Name" "David"))
+(test (SELECT '("Name") FROM Person WHERE (equal? "Name" "David"))
       '(("Name") ("David")))
 
 ;select single attribute in a table with duplicate tuples with specific where
-(test (SELECT '("Name") FROM DupTuples WHERE (= "Name" "David"))
-      '(("Name") ("David") ("David") ("David")))
-
-(test (SELECT '("Name") FROM Person WHERE (> "" "David"))
-      '(("Name") ("David")))
-
+(test (SELECT '("Name") FROM DupTuples WHERE (equal? "Name" "David"))
+      '(("Name") ("David") ("David") ("David") ("David")))
 
 ;---- This is where our test ends -----
 
@@ -287,13 +283,13 @@ the test we created
       '(()
         ()
         ()))
-
+#|
 ; Constant true condition
 (test (SELECT *
         FROM Person
         WHERE #t)
       Person)
-
+|#
 ; Constant false compound condition
 (test (SELECT *
         FROM Person
@@ -320,7 +316,7 @@ the test we created
         ("David" 20 #t "David" "CSC324")
         ("David" 20 #t "David" "CSC343")
         ("Paul" 100 #f "Paul" "CSC108")))
-
+#|
 ; Compound condition on three joined tables
 (test (SELECT '("P1.Name" "P1.LikesChocolate" "P.Age" "Course")
         FROM [Person "P"] [Teaching "T"] [Person "P1"]
@@ -332,7 +328,7 @@ the test we created
         ("David" #t 30 "CSC324")
         ("Paul" #f 30 "CSC108")
         ("David" #t 30 "CSC343")))
-
+|#
 ; ---- ORDER BY ----
 ; Order by attribute
 (test (SELECT *

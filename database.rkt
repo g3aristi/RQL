@@ -105,6 +105,7 @@ A function that takes:
   (satHelper f (rest table) (list(first table)) )
   )
 
+;helper function for satisfyCond, takes a condition, tuple and a accumulator
 (define (satHelper c t nt)
   (if (empty? t)
       nt
@@ -136,6 +137,8 @@ A function 'replaceAttr' that takes:
      )
 )
 
+;returns true or false if the target exists in the list
+; takes a target value, a list, and an accumulator
 (define (contains target array init)
   (if (empty? array)
       init
@@ -146,6 +149,7 @@ A function 'replaceAttr' that takes:
    )
 )
 
+;return the indices of the target value in the array
 (define (attIndex target la ind)
   (if (empty? la)
       ind
@@ -313,6 +317,7 @@ A function 'replaceAttr' that takes:
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
                                       ... )))]
+    ;***** SELECT FROM WHERE ****
     [(SELECT * FROM <table> WHERE <pred>)
      (append (list (attributes <table>)) (replace <pred> <table>))]
     [(SELECT <attrs> FROM <table> WHERE <pred>) 
@@ -330,31 +335,52 @@ A function 'replaceAttr' that takes:
     (select-from <attrs> (append (list (attributes (from 
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
-                                      ... ))
-                              )) (replace <pred> (from 
+                                      ... )))) 
+                                 (replace <pred> (from 
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
                                       ... )))))]
+    ;***** SELECT FROM ORDER BY *****
     [(SELECT * FROM <table> ORDER BY <ord>)
-     (append (list (attributes <table>))(order-by <ord> <table>))]
+     (order-by <ord> <table>)]
     [(SELECT <attrs> FROM <table> ORDER BY <ord>)
-     (select-from <attrs> (append (list <attrs>)(order-by <ord> <table>)))]
+     (select-from <attrs> (order-by <ord> <table>))]
     [(SELECT * FROM [<table1> <name1>] [<table2> <name2>] ... ORDER BY <ord>)
+     (order-by <ord> (from (list (list <table1> <name1>)
+                                         (list <table2> <name2>)
+                                         ... )))]
+    ;******** SELECT FROM WHERE ORDER BY *****
+    [(SELECT * FROM <table> WHERE <pred> ORDER BY <ord>)
+     (order-by <ord> (append (list (attributes <table>))
+                             (replace <pred> <table>)))]
+    [(SELECT * FROM [<table1> <name1>] [<table2> <name2>] ...
+             WHERE <pred> ORDER BY <ord>)
      (append (list (attributes (from 
                                 (list (list <table1> <name1>) 
                                       (list <table2> <name2>)
+                                      ... )))) 
+             (replace <pred> (order-by <ord> (from (list (list <table1> <name1>)
+                                         (list <table2> <name2>)
+                                         ... )))))]
+    [(SELECT <attrs> FROM <table>
+             WHERE <pred> ORDER BY <ord>)
+     (select-from <attrs> (append (list (attributes <table>))
+                    (replace <pred> (order-by <ord> <table>))))]
+    [(SELECT <attrs> FROM [<table1> <name1>] [<table2> <name2>] ...
+             WHERE <pred> ORDER BY <ord>)
+     (select-from <attrs> (append (list(attributes (from 
+                                (list (list <table1> <name1>) 
+                                      (list <table2> <name2>)
                                       ... ))))
-             (order-by <ord> (from (list (list <table1> <name1>)
-                                                                    (list <table2> <name2>)
-                                                                    ... ))))]
-    ;[(SELECT <attrs> FROM <lst-table> WHERE <pred> ORDER BY <ord>)
-     ;(select-from-where <attrs> <lst-table> <pred>)]
+             (replace <pred> (order-by <ord> (from (list (list <table1> <name1>)
+                                         (list <table2> <name2>)
+                                         ... ))))))]
   ))
 
 (define (order-by att table [by >])
   (let ([i (attIndex att (attributes table) 0)])
-    (sort (tuples table)
-          #:key (λ (x)(list-ref x i)) by)
+    (append (list (attributes table))(sort (tuples table)
+          #:key (λ (x)(list-ref x i)) by))
   
   ))
 ;---------------------------Our Own Testing-------------------------------------------------
@@ -387,6 +413,7 @@ A function 'replaceAttr' that takes:
         (list Person "t2")
         (list Teaching "t3"))
   )
+#|
 ;------------------------ Testing Attributes----------------------
 (write "Testing attributes -----------")
 (write "Table1")
@@ -481,4 +508,4 @@ A function 'replaceAttr' that takes:
         #t
         #f
     )
-) 
+) |#

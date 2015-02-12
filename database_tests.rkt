@@ -147,6 +147,17 @@ the test we created
         ("Paul" "Paul" "CSC108")
         ("Paul" "David" "CSC343")))
 
+;***** Testing SELECT FROM WHERE *****
+;select single attribute using a specific where
+(test (SELECT '("Name") FROM Person WHERE (= "Name" "David"))
+      '(("Name") ("David")))
+
+;select single attribute in a table with duplicate tuples with specific where
+(test (SELECT '("Name") FROM DupTuples WHERE (= "Name" "David"))
+      '(("Name") ("David") ("David") ("David")))
+
+(test (SELECT '("Name") FROM Person WHERE (> "" "David"))
+      '(("Name") ("David")))
 
 
 ;---- This is where our test ends -----
@@ -387,7 +398,7 @@ the test we created
         ("David" 20 #t "David" "CSC324")
         ("David" 20 #t "Paul" "CSC108")
         ("David" 20 #t "David" "CSC343")))
-#|
+
 
 ; ---- ORDER BY and WHERE ----
 ; Use attributes, select all 
@@ -431,7 +442,7 @@ the test we created
    ("Paul" "CSC108" #f)
    ("David" "CSC324" #t)
    ("David" "CSC343" #t)))
-
+#|
  
 ; ---- Nested queries ----
 (test
